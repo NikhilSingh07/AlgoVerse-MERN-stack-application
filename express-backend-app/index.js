@@ -1,11 +1,12 @@
 const express = require('express');
 const bodyParser  = require('body-parser');   
+const uuid= require('uuid');
 const app = express();
 const port = 3000;
 
 
-const USERS = [{name: 'Nikhil', password: '123'},
-               {name: 'Andrew', password: 'abcd'}
+const USERS = [{name: 'Nikhil', password: '123', token: ''},
+               {name: 'Andrew', password: 'abcd', token: '' }
               ];
 
 const QUESTIONS = [{
@@ -46,7 +47,6 @@ app.post('/signup', function(req, res) {
     USERS.push({email, password});  // append the object inside the USERS array.
   }
 
-  
   res.sendStatus(200);
   //res.send('Hello World from signup page');
 })
@@ -64,13 +64,31 @@ app.post('/signup', function(req, res) {
   // If the password is not the same, return back 401 status code to the client
 
 app.post('/login', (req, res) => {   // route
-  res.send('Hello World from login route')
+
+  const {email, password} = req.body;
+  const userCred = USERS.some( (user) => {return ( (user.email == email) && (user.password == password) )});
+
+  if(userCred) {
+
+    const user = USERS.find(user => user.email === email);
+    const token = uuid.v4();   // generates a random 128 bits unique ID
+
+    user.token  = token;
+    res.status(200).json({token: token});
+  } else {
+    res.sendStatus(401);
+  }
+
+  //res.send('Hello World from login route')
+   
 })
 
 
+
+//return the user all the questions in the QUESTIONS array
 app.get('/questions', (req, res) => {
 
-    res.send('Hello World from questions route')
+    res.json({question: QUESTIONS});
 })
 
 
